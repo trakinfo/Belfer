@@ -1,0 +1,87 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="My" GeneratedClassName="MySettings" UseMySettingsClassName="true">
+  <Profiles />
+  <Settings>
+    <Setting Name="UserName" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="ServerIP" Type="System.String" Scope="User">
+      <Value Profile="(Default)">localhost</Value>
+    </Setting>
+    <Setting Name="DBName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">belfer</Value>
+    </Setting>
+    <Setting Name="SysUser" Type="System.String" Scope="User">
+      <Value Profile="(Default)">user</Value>
+    </Setting>
+    <Setting Name="SysPassword" Type="System.String" Scope="User">
+      <Value Profile="(Default)">qfolam1kFmy9ZiX8CUH59Q==</Value>
+    </Setting>
+    <Setting Name="IdSchoolType" Type="System.String" Scope="User">
+      <Value Profile="(Default)">2</Value>
+    </Setting>
+    <Setting Name="IdSchool" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="ClassName" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="ObjectName" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="SchoolYear" Type="System.String" Scope="User">
+      <Value Profile="(Default)">2015/2016</Value>
+    </Setting>
+    <Setting Name="IdObsada" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="IdBelfer" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="LastMiejsceUr" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="LastMiejsceZam" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="XCaliber" Type="System.Single" Scope="User">
+      <Value Profile="(Default)">-3.937</Value>
+    </Setting>
+    <Setting Name="YCaliber" Type="System.Single" Scope="User">
+      <Value Profile="(Default)">-7.9</Value>
+    </Setting>
+    <Setting Name="PrintContent" Type="System.String" Scope="User">
+      <Value Profile="(Default)">chkFullName</Value>
+    </Setting>
+    <Setting Name="SSLMode" Type="System.Byte" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="SysSSLUser" Type="System.String" Scope="User">
+      <Value Profile="(Default)">userssl</Value>
+    </Setting>
+    <Setting Name="ServerSSLIP" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="SysSSLPassword" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="LeftMargin" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">39</Value>
+    </Setting>
+    <Setting Name="TopMargin" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">39</Value>
+    </Setting>
+    <Setting Name="TextFont" Type="System.Drawing.Font" Scope="User">
+      <Value Profile="(Default)">Times New Roman, 9.75pt</Value>
+    </Setting>
+    <Setting Name="HeaderFont" Type="System.Drawing.Font" Scope="User">
+      <Value Profile="(Default)">Arial, 12pt, style=Bold</Value>
+    </Setting>
+    <Setting Name="Landscape" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="SubHeaderFont" Type="System.Drawing.Font" Scope="User">
+      <Value Profile="(Default)">Arial, 9.75pt, style=Bold</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

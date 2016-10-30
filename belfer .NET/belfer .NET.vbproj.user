@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PublishUrlHistory>D:\.NET\VB\VB.NET_2012\Belfer.NET_80\Install\publish\|D:\.NET\VB\VB.NET_2012\Belfer.NET 6.1\Install\publish\|D:\.NET\VB\VB.NET_2012\Belfer .NET 6.0\Install\publish\|D:\.NET\VB\VB.NET_2012\Belfer .NET 5.2\Install\publish\|http://localhost/belfer/</PublishUrlHistory>
+    <InstallUrlHistory>http://trakinfo.idsl.pl/belfer/|http://localhost/belfer/|http://sql.gimsusz.idsl.pl/belfer/</InstallUrlHistory>
+    <SupportUrlHistory>http://trakinfo.idsl.pl</SupportUrlHistory>
+    <UpdateUrlHistory>http://trakinfo.idsl.pl/belfer/|http://localhost/belfer/|http://localhost/belfer.NET/</UpdateUrlHistory>
+    <BootstrapperUrlHistory />
+    <ErrorReportUrlHistory />
+    <FallbackCulture>en-US</FallbackCulture>
+    <VerifyUploadedFiles>false</VerifyUploadedFiles>
+    <ProjectView>ProjectFiles</ProjectView>
+  </PropertyGroup>
+  <PropertyGroup>
+    <EnableSecurityDebugging>false</EnableSecurityDebugging>
+  </PropertyGroup>
+</Project>
