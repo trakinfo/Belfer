@@ -1,0 +1,42 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="BelferCS.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="SchoolYear" Type="System.String" Scope="User">
+      <Value Profile="(Default)">2016/2017</Value>
+    </Setting>
+    <Setting Name="IdSchool" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">1</Value>
+    </Setting>
+    <Setting Name="IdSchoolType" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">2</Value>
+    </Setting>
+    <Setting Name="XCaliber" Type="System.Single" Scope="User">
+      <Value Profile="(Default)">-3.937</Value>
+    </Setting>
+    <Setting Name="YCaliber" Type="System.Single" Scope="User">
+      <Value Profile="(Default)">-7.9</Value>
+    </Setting>
+    <Setting Name="LeftMargin" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">39</Value>
+    </Setting>
+    <Setting Name="TopMargin" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">39</Value>
+    </Setting>
+    <Setting Name="TextFont" Type="System.Drawing.Font" Scope="User">
+      <Value Profile="(Default)">Times New Roman, 9.75pt</Value>
+    </Setting>
+    <Setting Name="HeaderFont" Type="System.Drawing.Font" Scope="User">
+      <Value Profile="(Default)">Arial, 12pt, style=Bold</Value>
+    </Setting>
+    <Setting Name="SubHeaderFont" Type="System.Drawing.Font" Scope="User">
+      <Value Profile="(Default)">Arial, 11.25pt, style=Bold</Value>
+    </Setting>
+    <Setting Name="Landscape" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="SchoolName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Gimnazjum w Suszu</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
