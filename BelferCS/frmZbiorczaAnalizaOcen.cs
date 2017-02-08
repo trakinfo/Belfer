@@ -677,34 +677,32 @@ namespace BelferCS
             StaffBranch Level0 = (StaffBranch)tlvAnaliza.GetModelObject(0);
             if (Offset[0] == 0)
             {
-                //PrintModelObjectData(Level0, x, ref y, Kolumna, new Font(TextFont, FontStyle.Bold), LineHeight * MultiplyLine, 0, true);
-                PrintItemData(tlvAnaliza.GetItem(0), x, ref y, Kolumna, new Font(TextFont, FontStyle.Bold), LineHeight * MultiplyLine, 0, true);
+                PrintModelObjectData(Level0, x, ref y, Kolumna, new Font(TextFont, FontStyle.Bold), LineHeight * MultiplyLine, 0, true);
                 y += LineHeight * 0.5F;
             }
-            tlvAnaliza.ExpandAll();
             int Indent = 20;
-           int L= tlvAnaliza.TreeModel.GetBranch(tlvAnaliza.GetModelObject(0)).ChildBranches.Count;
-            while (y + LineHeight * 4.5f < PrintHeight && Offset[0] < Level0.Children.Count)
-            {
-                MultiplyLine = 2;
-                StaffBranch Level1 = Level0.Children[Offset[0]];
-                int L1 = tlvAnaliza.TreeModel.GetBranch(tlvAnaliza.GetModelObject(Offset[0])).ChildBranches.Count;
 
+            MultiplyLine = rbLiczbowoProcentowo.Checked ? 2 : 0;
+            while (y + LineHeight * (4.5f + MultiplyLine) < PrintHeight && Offset[0] < Level0.Children.Count)
+            {
+                //MultiplyLine = 2;
+                StaffBranch Level1 = Level0.Children[Offset[0]];
                 if (Offset[1] == 0 & Offset[2] == 0)
                 {
                     PrintModelObjectData(Level1, x, ref y, Kolumna, new Font(TextFont, FontStyle.Bold), LineHeight * MultiplyLine, Indent, true);
                     y += LineHeight * 0.5F;
                 }
 
-                while (y + LineHeight * 2 < PrintHeight && Offset[1] < Level1.Children.Count)
+                MultiplyLine = rbLiczbowoProcentowo.Checked ? 2 : 1;
+                while (y + LineHeight * 2 * MultiplyLine < PrintHeight && Offset[1] < Level1.Children.Count)
                 {
                     StaffBranch Level2 = Level1.Children[Offset[1]];
-                    if (Offset[2] == 0) PrintModelObjectData(Level2, x, ref y, Kolumna, new Font(TextFont, FontStyle.Bold), LineHeight, Indent * 2, true);
+                    if (Offset[2] == 0) PrintModelObjectData(Level2, x, ref y, Kolumna, new Font(TextFont, FontStyle.Bold), LineHeight * MultiplyLine, Indent * 2, true);
                     
-                    while (y + LineHeight < PrintHeight && Offset[2] < Level2.Children.Count)
+                    while (y + LineHeight * MultiplyLine < PrintHeight && Offset[2] < Level2.Children.Count)
                     {
                         StaffBranch Level3 = Level2.Children[Offset[2]];
-                        PrintModelObjectData(Level3, x, ref y, Kolumna, TextFont, LineHeight, Indent * 3);
+                        PrintModelObjectData(Level3, x, ref y, Kolumna, TextFont, LineHeight * MultiplyLine, Indent * 3);
                         Offset[2] += 1;
                     }
                     if (Offset[2] < Level2.Children.Count)
@@ -745,44 +743,56 @@ namespace BelferCS
         }
         private void PrintModelObjectData(StaffBranch Node, float x, ref float y, List<TableCell> Kolumna, Font PrintFont, float LineHeight, int TabIndent=0, bool FillBackground=false)
         {
-            PH.DrawText(Node.Label, PrintFont, x+TabIndent , y, Kolumna[0].Size-TabIndent, LineHeight , 0, Brushes.Black, true, false, FillBackground);
-            x += Kolumna[0].Size;
-            PH.DrawText(Node.StudentCount.ToString(), PrintFont, x , y, Kolumna[1].Size, LineHeight, 1, Brushes.Black, true, false, FillBackground);
-            x += Kolumna[1].Size;
-            PH.DrawText(Node.TotalScoreCount.ToString(), PrintFont, x, y, Kolumna[2].Size, LineHeight, 1, Brushes.Black, true, false, FillBackground);
-            x += Kolumna[2].Size;
-            PH.DrawText(Node.UnclassifiedCount.ToString(), PrintFont, x , y, Kolumna[3].Size, LineHeight, 1, Brushes.Black, true, false, FillBackground);
-            x += Kolumna[3].Size;
-            PH.DrawText(Node.ExcelentCount.ToString(), PrintFont, x, y, Kolumna[4].Size, LineHeight, 1, Brushes.Black, true, false, FillBackground);
-            x += Kolumna[4].Size;
-            PH.DrawText(Node.VeryGoodCount.ToString(), PrintFont, x, y, Kolumna[5].Size, LineHeight, 1, Brushes.Black, true, false, FillBackground);
-            x += Kolumna[5].Size;
-            PH.DrawText(Node.GoodCount.ToString(), PrintFont, x, y, Kolumna[6].Size, LineHeight, 1, Brushes.Black, true, false, FillBackground);
-            x += Kolumna[6].Size;
-            PH.DrawText(Node.SufficientCount.ToString(), PrintFont, x, y, Kolumna[7].Size, LineHeight, 1, Brushes.Black, true, false, FillBackground);
-            x += Kolumna[7].Size;
-            PH.DrawText(Node.PassedCount.ToString(), PrintFont, x, y, Kolumna[8].Size, LineHeight, 1, Brushes.Black, true, false, FillBackground);
-            x += Kolumna[8].Size;
-            PH.DrawText(Node.FailedCount.ToString(), PrintFont, x, y, Kolumna[9].Size, LineHeight, 1, Brushes.Black, true, false, FillBackground);
-            x += Kolumna[9].Size;
-            PH.DrawText(Node.AvgScore.ToString(), PrintFont, x, y, Kolumna[10].Size, LineHeight, 1, Brushes.Black, true, false, FillBackground);
-            x += Kolumna[10].Size;
-            PH.DrawText(Node.MedianScore.ToString(), PrintFont, x, y, Kolumna[11].Size, LineHeight, 1, Brushes.Black, true, false, FillBackground);
-            x += Kolumna[11].Size;
-            PH.DrawText(Node.DominantScore.ToString(), PrintFont, x, y, Kolumna[12].Size, LineHeight, 1, Brushes.Black, true, false, FillBackground);
-            x += Kolumna[12].Size;
-            y += LineHeight;
-        }
-
-        private void PrintItemData(OLVListItem TreeItem, float x, ref float y, List<TableCell> Kolumna, Font PrintFont, float LineHeight, int TabIndent = 0, bool FillBackground = false)
-        {
-            foreach (var C in tlvAnaliza.AllColumns)
+            List<string> AspectToPrint=new List<string>();
+            AspectToPrint.Add(Node.Label);
+            AspectToPrint.Add(Node.StudentCount.ToString());
+            if (rbLiczbowo.Checked)
             {
-                PH.DrawText(TreeItem.GetSubItem(C.Index).Text, PrintFont, x, y, Kolumna[C.Index].Size, LineHeight, 1, Brushes.Black, true, false, FillBackground);
-                x += Kolumna[C.Index].Size;
+                AspectToPrint.Add(Node.TotalScoreCount.ToString());
+                AspectToPrint.Add(Node.UnclassifiedCount.ToString());
+                AspectToPrint.Add(Node.ExcelentCount.ToString());
+                AspectToPrint.Add(Node.VeryGoodCount.ToString());
+                AspectToPrint.Add(Node.GoodCount.ToString());
+                AspectToPrint.Add(Node.SufficientCount.ToString());
+                AspectToPrint.Add(Node.PassedCount.ToString());
+                AspectToPrint.Add(Node.FailedCount.ToString());
+            }
+            else if (rbProcentowo.Checked)
+            {
+                AspectToPrint.Add(Node.TotalScoreCountByPercent.ToString() + "%");
+                AspectToPrint.Add(Node.UnclassifiedCountByPercent.ToString()+ "%") ;
+                AspectToPrint.Add(Node.ExcelentCountByPercent.ToString() + "%");
+                AspectToPrint.Add(Node.VeryGoodCountByPercent.ToString() + "%");
+                AspectToPrint.Add(Node.GoodCountByPercent.ToString() + "%");
+                AspectToPrint.Add(Node.SufficientCountByPercent.ToString() + "%");
+                AspectToPrint.Add(Node.PassedCountByPercent.ToString() + "%");
+                AspectToPrint.Add(Node.FailedCountByPercent.ToString() + "%");
+            }
+            else
+            {
+                AspectToPrint.Add(Node.TotalScoreCount.ToString() + "\n(" + Node.TotalScoreCountByPercent.ToString() + "%)");
+                AspectToPrint.Add(Node.UnclassifiedCount.ToString() + "\n(" + Node.UnclassifiedCountByPercent.ToString() + "%)");
+                AspectToPrint.Add(Node.ExcelentCount.ToString() + "\n(" + Node.ExcelentCountByPercent.ToString() + "%)");
+                AspectToPrint.Add(Node.VeryGoodCount.ToString() + "\n(" + Node.VeryGoodCountByPercent.ToString() + "%)");
+                AspectToPrint.Add(Node.GoodCount.ToString() + "\n(" + Node.GoodCountByPercent.ToString() + "%)");
+                AspectToPrint.Add(Node.SufficientCount.ToString() + "\n(" + Node.SufficientCountByPercent.ToString() + "%)");
+                AspectToPrint.Add(Node.PassedCount.ToString() + "\n(" + Node.PassedCountByPercent.ToString() + "%)");
+                AspectToPrint.Add(Node.FailedCount.ToString() + "\n(" + Node.FailedCountByPercent.ToString() + "%)");
+            }
+            AspectToPrint.Add(Node.AvgScore.ToString());
+            AspectToPrint.Add(Node.MedianScore.ToString());
+            AspectToPrint.Add(Node.DominantScore.ToString());
+            PH.DrawText(AspectToPrint[0], PrintFont, x + TabIndent, y, Kolumna[0].Size - TabIndent, LineHeight, 0, Brushes.Black, true, false, FillBackground);
+            x += Kolumna[0].Size;
+
+            for (int i = 1; i < AspectToPrint.Count; i++)
+            {
+                PH.DrawText(AspectToPrint[i], PrintFont, x, y, Kolumna[i].Size, LineHeight, 1, Brushes.Black, true, false, FillBackground);
+                x += Kolumna[i].Size;
             }
             y += LineHeight;
         }
+
         #endregion
         /// <summary>
         /// Klasy prywatne do użytku wewnętrznego
