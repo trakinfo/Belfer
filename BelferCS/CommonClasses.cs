@@ -8,13 +8,13 @@ namespace BelferCS
     public static class CustomType
     {
         public enum PageNumberLocation { Header = 0, Footer = 1 }
-
+        public enum AnalysisOption { ByNumber, ByPercent, ByBoth }
     }
 
     /// <summary>
     /// Wyzwala zdarzenie informujące otwarte formularze o zmianie parametrów pracy (rok szkolny, szkoła, typ szkoły)
     /// </summary>
-    public class SharedConfiguration
+    public static class SharedConfiguration
     {
         public delegate void ConfigurationHandler();
         public static event ConfigurationHandler ConfigurationChanged;

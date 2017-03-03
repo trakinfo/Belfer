@@ -23,17 +23,20 @@ namespace BelferCS
         private void OK_Button_Click(object sender, EventArgs e)
         {
             var dlgPrint = new PrintDialog();
-            dlgPrint.AllowSomePages = false;
+            dlgPrint.AllowSomePages = true;
             dlgPrint.PrinterSettings.FromPage = 1;
             dlgPrint.PrinterSettings.ToPage = 1;
             if (dlgPrint.ShowDialog() == DialogResult.OK)
             {
                 PreviewModeChanged?.Invoke(false);
-                pvWydruk.Document.DefaultPageSettings.PrinterSettings.Copies = dlgPrint.PrinterSettings.Copies;
-                pvWydruk.Document.DefaultPageSettings.PrinterSettings.FromPage = dlgPrint.PrinterSettings.FromPage;
-                pvWydruk.Document.DefaultPageSettings.PrinterSettings.ToPage = dlgPrint.PrinterSettings.ToPage;
-                pvWydruk.Document.DefaultPageSettings.PrinterSettings.PrinterName = dlgPrint.PrinterSettings.PrinterName;
-                pvWydruk.Document.Print();
+                pvWydruk.Document.PrinterSettings.PrintRange=dlgPrint.PrinterSettings.PrintRange;
+                pvWydruk.Document.PrinterSettings.FromPage = dlgPrint.PrinterSettings.FromPage;
+                pvWydruk.Document.PrinterSettings.ToPage = dlgPrint.PrinterSettings.ToPage;               
+                pvWydruk.Document.PrinterSettings.PrinterName = dlgPrint.PrinterSettings.PrinterName;
+                for (int i = 0; i < dlgPrint.PrinterSettings.Copies; i++)
+                {
+                    pvWydruk.Document.Print();
+                }
                 PreviewModeChanged?.Invoke(true);                
             }
         }
@@ -83,11 +86,8 @@ namespace BelferCS
             nudZoom.Value = tbZoom.Value;
             pvWydruk.Zoom = tbZoom.Value * 0.01;
         }
-        public void NewRow()
-        {
-            pvWydruk.Rows += 1;
-        }
-
+        public void NewRow() => pvWydruk.Rows += 1;
+       
         private void pvWydruk_Click(object sender, EventArgs e)
         {
             if (ModifierKeys == Keys.Shift || ModifierKeys == Keys.Control)
@@ -133,6 +133,7 @@ namespace BelferCS
             Settings.Default.Landscape = ((RadioButton)sender).Name == rbHorizontal.Name ? ((RadioButton)sender).Checked : !((RadioButton)sender).Checked;
             Settings.Default.Save();
             pvWydruk.Document.DefaultPageSettings.Landscape = Settings.Default.Landscape;
+            pvWydruk.Rows = 1;
             pvWydruk.InvalidatePreview();
         }
 
@@ -142,6 +143,7 @@ namespace BelferCS
             Settings.Default.LeftMargin = (int)CHM.MMtoIN(((float)((NumericUpDown)sender).Value));
             Settings.Default.Save();
             SetHorizontalMargins();
+            pvWydruk.Rows = 1;
             pvWydruk.InvalidatePreview();
         }
 
@@ -151,6 +153,7 @@ namespace BelferCS
             Settings.Default.TopMargin = (int)CHM.MMtoIN(((float)((NumericUpDown)sender).Value));
             Settings.Default.Save();
             SetVerticalMargins();
+            pvWydruk.Rows = 1;
             pvWydruk.InvalidatePreview();
         }
         private void SetMargins()

@@ -89,6 +89,7 @@
             // 
             // panel2
             // 
+            this.panel2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.panel2.Controls.Add(this.rbRokSzkolny);
             this.panel2.Controls.Add(this.rbSemestr);
             this.panel2.Location = new System.Drawing.Point(746, 2);

@@ -18,6 +18,8 @@ namespace BelferCS
         }
         public delegate void NewRowHandler();
         public event NewRowHandler NewRow;
+        public delegate void AnalysisTypeHandler(CustomType.AnalysisOption option);
+        public event AnalysisTypeHandler SetAnalysisType;
         public event EventHandler TheEnd;
         private static MySqlConnection conn;
         private dlgWait Wait = new dlgWait { Tag = "Pobieranie danych ..." };
@@ -27,6 +29,7 @@ namespace BelferCS
         private List<string> ReportHeader;
         private int[] Offset=new int[3];
         private bool IsPreview;
+        private CustomType.AnalysisOption AnalysisType;
         private PrintHelper PH = new PrintHelper();
         private DateTime EndOfSemester = default(DateTime), EndOfSchoolYear = default(DateTime);
         private List<SubjectStaff> lstObsada =new List<SubjectStaff>();
@@ -50,9 +53,6 @@ namespace BelferCS
         {
             SharedConfiguration.ConfigurationChanged += ApplyNewConfig;
             conn.Open();
-            //string[] SeekCriteria = new string[] { "Klasa", "Nazwisko i imię","Przedmiot"};
-            //cbSeek.Items.AddRange(SeekCriteria);
-            //cbSeek.SelectedIndex = 0;
             ListViewConfig(tlvAnaliza);
             GenerateColumns(tlvAnaliza, SpecifyCols());
 
@@ -60,20 +60,10 @@ namespace BelferCS
         }
         private void frmZbiorczaAnalizaOcen_FormClosed(object sender, FormClosedEventArgs e)
         {
-            try
-            {
-                
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-            finally
-            {
-            TheEnd?.Invoke(sender,e);
+            SharedConfiguration.ConfigurationChanged -= ApplyNewConfig;
+            TheEnd?.Invoke(sender, e);
             conn.Dispose();
-            }
-        }
+         }
         private void ListViewConfig(TreeListView olv)
         {
             olv.View = View.Details;
@@ -82,7 +72,6 @@ namespace BelferCS
             olv.AllowColumnReorder = false;
             olv.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
             olv.HideSelection = false;
-            //olv.ShowGroups = true;
             olv.UseFiltering = true;
             olv.HeaderStyle = ColumnHeaderStyle.Clickable;
             olv.ShowItemToolTips = true;
@@ -92,9 +81,8 @@ namespace BelferCS
             olv.HeaderMaximumHeight =80;
             olv.HeaderMinimumHeight = 50;
             HeaderFormatStyle HeaderStyle = new HeaderFormatStyle();
-            HeaderStyle.SetFont(new System.Drawing.Font(olv.Font.FontFamily, olv.Font.Size, System.Drawing.FontStyle.Bold));
+            HeaderStyle.SetFont(new Font(olv.Font.FontFamily, olv.Font.Size, FontStyle.Bold));
             olv.HeaderFormatStyle = HeaderStyle;
-            //olv.SmallImageList = new ImageList { ImageSize = new System.Drawing.Size(16, 16) };
         }
 
         private void GenerateColumns(TreeListView olv, List<OLVColumn> Cols)
@@ -106,11 +94,10 @@ namespace BelferCS
 
         private void ApplyNewConfig()
         {
-            int Year=DateTime.Today.Year;
+            int Year = DateTime.Today.Year;
             int.TryParse(DateTime.Today.Month > 8 ? Settings.Default.SchoolYear.Substring(0, 4) : Settings.Default.SchoolYear.Substring(5, 4), out Year);
             DateTime CurrentDate = new DateTime(Year, DateTime.Today.Month, DateTime.Today.Day);
             var CH = new CalcHelper();
-            //StartDateOfSchoolYear = CH.StartDateOfSchoolYear(Settings.Default.SchoolYear);
             EndOfSemester = CH.StartDateOfSemester2(Settings.Default.SchoolYear,CurrentDate, conn).AddDays(-1);
             EndOfSchoolYear = CH.EndDateOfSchoolYear(Settings.Default.SchoolYear);
 
@@ -155,53 +142,15 @@ namespace BelferCS
             Cols.Add(new OLVColumn { Text = "Mediana", AspectName = "MedianScore", MinimumWidth = 30, Width = 40, FillsFreeSpace = false, TextAlign = HorizontalAlignment.Center, HeaderTextAlign = HorizontalAlignment.Center, ToolTipText = "Wartość środkowa", IsHeaderVertical = true });
             Cols.Add(new OLVColumn { Text = "Dominanta", AspectName = "DominantScore", MinimumWidth = 30, Width = 30, FillsFreeSpace = false, TextAlign = HorizontalAlignment.Center, HeaderTextAlign = HorizontalAlignment.Center, ToolTipText = "Ocena występująca najczęściej", IsHeaderVertical = true });
 
-
             return Cols;
     }
-
-        private void SetAspectGetter(byte opcja)
-        {
-            switch (opcja)
-            {
-                case 0:
-                    tlvAnaliza.GetColumn(2).AspectGetter = delegate (object x) { return ((StaffBranch)x).TotalScoreCount; };
-                    tlvAnaliza.GetColumn(3).AspectGetter = delegate (object x) { return ((StaffBranch)x).UnclassifiedCount; };
-                    tlvAnaliza.GetColumn(4).AspectGetter = delegate (object x) { return ((StaffBranch)x).ExcelentCount; };
-                    tlvAnaliza.GetColumn(5).AspectGetter = delegate (object x) { return ((StaffBranch)x).VeryGoodCount; };
-                    tlvAnaliza.GetColumn(6).AspectGetter = delegate (object x) { return ((StaffBranch)x).GoodCount; };
-                    tlvAnaliza.GetColumn(7).AspectGetter = delegate (object x) { return ((StaffBranch)x).SufficientCount; };
-                    tlvAnaliza.GetColumn(8).AspectGetter = delegate (object x) { return ((StaffBranch)x).PassedCount; };
-                    tlvAnaliza.GetColumn(9).AspectGetter = delegate (object x) { return ((StaffBranch)x).FailedCount; };
-                    break;
-                case 1:
-                    tlvAnaliza.GetColumn(2).AspectGetter = delegate (object x) { return ((StaffBranch)x).TotalScoreCountByPercent+"%"; };
-                    tlvAnaliza.GetColumn(3).AspectGetter = delegate (object x) { return ((StaffBranch)x).UnclassifiedCountByPercent+"%"; };
-                    tlvAnaliza.GetColumn(4).AspectGetter = delegate (object x) { return ((StaffBranch)x).ExcelentCountByPercent + "%"; };
-                    tlvAnaliza.GetColumn(5).AspectGetter = delegate (object x) { return ((StaffBranch)x).VeryGoodCountByPercent + "%"; };
-                    tlvAnaliza.GetColumn(6).AspectGetter = delegate (object x) { return ((StaffBranch)x).GoodCountByPercent + "%"; };
-                    tlvAnaliza.GetColumn(7).AspectGetter = delegate (object x) { return ((StaffBranch)x).SufficientCountByPercent + "%"; };
-                    tlvAnaliza.GetColumn(8).AspectGetter = delegate (object x) { return ((StaffBranch)x).PassedCountByPercent + "%"; };
-                    tlvAnaliza.GetColumn(9).AspectGetter = delegate (object x) { return ((StaffBranch)x).FailedCountByPercent + "%"; };
-                    break;
-                case 2:
-                    tlvAnaliza.GetColumn(2).AspectGetter = delegate (object x) { return ((StaffBranch)x).TotalScoreCount + " (" + ((StaffBranch)x).TotalScoreCountByPercent + "%)"; };
-                    tlvAnaliza.GetColumn(3).AspectGetter = delegate (object x) { return ((StaffBranch)x).UnclassifiedCount + " (" + ((StaffBranch)x).UnclassifiedCountByPercent + "%)"; };
-                    tlvAnaliza.GetColumn(4).AspectGetter = delegate (object x) { return ((StaffBranch)x).ExcelentCount + " (" + ((StaffBranch)x).ExcelentCountByPercent + "%)"; };
-                    tlvAnaliza.GetColumn(5).AspectGetter = delegate (object x) { return ((StaffBranch)x).VeryGoodCount + " (" + ((StaffBranch)x).VeryGoodCountByPercent + "%)"; };
-                    tlvAnaliza.GetColumn(6).AspectGetter = delegate (object x) { return ((StaffBranch)x).GoodCount + " (" + ((StaffBranch)x).GoodCountByPercent + "%)"; };
-                    tlvAnaliza.GetColumn(7).AspectGetter = delegate (object x) { return ((StaffBranch)x).SufficientCount + " (" + ((StaffBranch)x).SufficientCountByPercent + "%)"; };
-                    tlvAnaliza.GetColumn(8).AspectGetter = delegate (object x) { return ((StaffBranch)x).PassedCount + " (" + ((StaffBranch)x).PassedCountByPercent + "%)"; };
-                    tlvAnaliza.GetColumn(9).AspectGetter = delegate (object x) { return ((StaffBranch)x).FailedCount + " (" + ((StaffBranch)x).FailedCountByPercent + "%)"; };
-                    break;
-            }
-        }
-        
+      
         private void rbLiczbowo_CheckedChanged(object sender, EventArgs e)
         {
             if (((RadioButton)sender).Checked == false) return;
-            byte opcja=0;
-            byte.TryParse(((RadioButton)sender).Tag.ToString(), out opcja);
-            SetAspectGetter(opcja);
+            AnalysisType = (CustomType.AnalysisOption)Enum.Parse(typeof(CustomType.AnalysisOption), ((RadioButton)sender).Tag.ToString());
+            SetAnalysisType?.Invoke(AnalysisType);
+            tlvAnaliza.RowHeight = AnalysisType == CustomType.AnalysisOption.ByBoth ? 30 : -1;
             tlvAnaliza.Refresh();
         }
 
@@ -222,10 +171,7 @@ namespace BelferCS
             Wait.ShowDialog();
         }
 
-        private void cmdRefresh_Click(object sender, EventArgs e)
-        {
-            RefreshData();
-        }
+        private void cmdRefresh_Click(object sender, EventArgs e) => RefreshData();
 
         private void bwFetchData_DoWork(Object sender, DoWorkEventArgs e)
         {
@@ -236,7 +182,6 @@ namespace BelferCS
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
-                //throw;
             }
         }
         private void FetchData()
@@ -312,10 +257,8 @@ namespace BelferCS
                 rbNauczyciel_CheckedChanged(rbTyp, null);
             }
         }
-        private void tmRefresh_tick(Object sender, EventArgs e)
-        {
-            Wait.Refresh();
-        }
+        private void tmRefresh_tick(Object sender, EventArgs e) => Wait.Refresh();
+
         private void GetData(TreeListView olv)
         {
             try
@@ -323,7 +266,6 @@ namespace BelferCS
                 pbrProgress.Visible = true;
                 olv.BeginUpdate();
                 olv.Items.Clear();
-                //var lstAnalysis = GetAnalysisTree();
                 olv.CanExpandGetter = delegate (object SB) { return ((StaffBranch)SB).Children.Count > 0; };
                 olv.ChildrenGetter = delegate (object SB) { return ((StaffBranch)SB).Children; };
                 olv.Roots = GetAnalysisTree();
@@ -341,23 +283,17 @@ namespace BelferCS
         private List<StaffBranch> GetAnalysisTree()
         {
             List<StaffBranch> AnalysisTree = new List<StaffBranch>();
-            var SchoolNode = new StaffBranch { Label = Settings.Default.SchoolName };
+ 
+            var SchoolNode = new StaffBranch();
+            SetAnalysisType += SchoolNode.SetOption;
             SchoolNode.Children = GetAnalysis();
-            SchoolNode.StudentCount = SchoolNode.Children.Sum(x => x.StudentCount);
-            SchoolNode.ExcelentCount = SchoolNode.Children.Sum(x => x.ExcelentCount);
-            SchoolNode.VeryGoodCount = SchoolNode.Children.Sum(x => x.VeryGoodCount);
-            SchoolNode.GoodCount = SchoolNode.Children.Sum(x => x.GoodCount);
-            SchoolNode.SufficientCount = SchoolNode.Children.Sum(x => x.SufficientCount);
-            SchoolNode.PassedCount = SchoolNode.Children.Sum(x => x.PassedCount);
-            SchoolNode.FailedCount = SchoolNode.Children.Sum(x => x.FailedCount);
-            SchoolNode.UnclassifiedCount = SchoolNode.Children.Sum(x => x.UnclassifiedCount);
+            ComputeScore(SchoolNode, Settings.Default.SchoolName);
             AnalysisTree.Add(SchoolNode);
-            
             return AnalysisTree;
         }
         private List<StaffBranch> GetAnalysis()
         {
-            if (((RadioButton)rbTyp).Name == rbNauczyciel.Name)
+            if (rbTyp.Name == rbNauczyciel.Name)
             {
                 return GetAnalysisByTeacher();
             }
@@ -381,16 +317,10 @@ namespace BelferCS
             foreach (var Belfer in lstObsada.Select(x => new { x.Teacher.ID, x.Teacher.Nazwa }).Distinct().OrderBy(x => x.Nazwa).ToList())
             {
                 TeacherUnit Teacher = new TeacherUnit { ID = Belfer.ID, Nazwa = Belfer.Nazwa };
-                var TeacherNode = new StaffBranch { Label = Teacher.Nazwa };
+                var TeacherNode = new StaffBranch();
+                SetAnalysisType += TeacherNode.SetOption;
                 TeacherNode.Children = GetAnalysisBySubject(Teacher);
-                TeacherNode.StudentCount = TeacherNode.Children.Sum(x => x.StudentCount);
-                TeacherNode.ExcelentCount = TeacherNode.Children.Sum(x => x.ExcelentCount);
-                TeacherNode.VeryGoodCount = TeacherNode.Children.Sum(x => x.VeryGoodCount);
-                TeacherNode.GoodCount = TeacherNode.Children.Sum(x => x.GoodCount);
-                TeacherNode.SufficientCount = TeacherNode.Children.Sum(x => x.SufficientCount);
-                TeacherNode.PassedCount = TeacherNode.Children.Sum(x => x.PassedCount);
-                TeacherNode.FailedCount = TeacherNode.Children.Sum(x => x.FailedCount);
-                TeacherNode.UnclassifiedCount = TeacherNode.Children.Sum(x => x.UnclassifiedCount);
+                ComputeScore(TeacherNode, Belfer.Nazwa);
                 AnalysisTree.Add(TeacherNode);
             }
             return AnalysisTree;
@@ -407,16 +337,10 @@ namespace BelferCS
             foreach (var Przedmiot in lstSubject)
             {
                 StaffUnit Subject = new StaffUnit { ID = Przedmiot.ID, Nazwa = Przedmiot.Nazwa };
-                var SubjectNode = new StaffBranch { Label = Przedmiot.Nazwa };
+                var SubjectNode = new StaffBranch();
+                SetAnalysisType += SubjectNode.SetOption;
                 SubjectNode.Children = GetAnalysisByClass(Teacher, Subject);
-                SubjectNode.StudentCount = SubjectNode.Children.Sum(x => x.StudentCount);
-                SubjectNode.ExcelentCount = SubjectNode.Children.Sum(x => x.ExcelentCount);
-                SubjectNode.VeryGoodCount = SubjectNode.Children.Sum(x => x.VeryGoodCount);
-                SubjectNode.GoodCount = SubjectNode.Children.Sum(x => x.GoodCount);
-                SubjectNode.SufficientCount = SubjectNode.Children.Sum(x => x.SufficientCount);
-                SubjectNode.PassedCount = SubjectNode.Children.Sum(x => x.PassedCount);
-                SubjectNode.FailedCount = SubjectNode.Children.Sum(x => x.FailedCount);
-                SubjectNode.UnclassifiedCount = SubjectNode.Children.Sum(x => x.UnclassifiedCount);
+                ComputeScore(SubjectNode, Przedmiot.Nazwa);   
                 AnalysisTree.Add(SubjectNode);
             }
             return AnalysisTree;
@@ -430,16 +354,10 @@ namespace BelferCS
             foreach (var Przedmiot in lstObsada.Select(x => new { x.Subject.ID, x.Subject.Nazwa }).Distinct().ToList())
             {
                 SubjectUnit Subject = new SubjectUnit { ID = Przedmiot.ID, Nazwa = Przedmiot.Nazwa };
-                var SubjectNode = new StaffBranch { Label = Przedmiot.Nazwa };
+                var SubjectNode = new StaffBranch();
+                SetAnalysisType += SubjectNode.SetOption;
                 SubjectNode.Children = GetAnalysisByTeacher(Subject);
-                SubjectNode.StudentCount = SubjectNode.Children.Sum(x => x.StudentCount);
-                SubjectNode.ExcelentCount = SubjectNode.Children.Sum(x => x.ExcelentCount);
-                SubjectNode.VeryGoodCount = SubjectNode.Children.Sum(x => x.VeryGoodCount);
-                SubjectNode.GoodCount = SubjectNode.Children.Sum(x => x.GoodCount);
-                SubjectNode.SufficientCount = SubjectNode.Children.Sum(x => x.SufficientCount);
-                SubjectNode.PassedCount = SubjectNode.Children.Sum(x => x.PassedCount);
-                SubjectNode.FailedCount = SubjectNode.Children.Sum(x => x.FailedCount);
-                SubjectNode.UnclassifiedCount = SubjectNode.Children.Sum(x => x.UnclassifiedCount);
+                ComputeScore(SubjectNode, Przedmiot.Nazwa);
                 AnalysisTree.Add(SubjectNode);
             }
             return AnalysisTree;
@@ -451,21 +369,15 @@ namespace BelferCS
         /// <returns>List of teacher nodes for pointed subject</returns>
         private List<StaffBranch> GetAnalysisByTeacher(StaffUnit Subject)
         {
-            var lstTeacher = lstObsada.Where(x => x.Subject.ID == Subject.ID).Select(x => new { x.Teacher.ID, x.Teacher.Nazwa }).Distinct().ToList();
+            var lstTeacher = lstObsada.Where(x => x.Subject.ID == Subject.ID).Select(x => new { x.Teacher.ID, x.Teacher.Nazwa }).OrderBy(x => x.Nazwa).Distinct().ToList();
             List<StaffBranch> AnalysisTree = new List<StaffBranch>();
             foreach (var Belfer in lstTeacher)
             {
                 StaffUnit Teacher = new StaffUnit { ID = Belfer.ID, Nazwa = Belfer.Nazwa };
-                var TeacherNode = new StaffBranch { Label = Belfer.Nazwa };
+                var TeacherNode = new StaffBranch();
+                SetAnalysisType += TeacherNode.SetOption;
                 TeacherNode.Children = GetAnalysisByClass(Teacher, Subject);
-                TeacherNode.StudentCount = TeacherNode.Children.Sum(x => x.StudentCount);
-                TeacherNode.ExcelentCount = TeacherNode.Children.Sum(x => x.ExcelentCount);
-                TeacherNode.VeryGoodCount = TeacherNode.Children.Sum(x => x.VeryGoodCount);
-                TeacherNode.GoodCount = TeacherNode.Children.Sum(x => x.GoodCount);
-                TeacherNode.SufficientCount = TeacherNode.Children.Sum(x => x.SufficientCount);
-                TeacherNode.PassedCount = TeacherNode.Children.Sum(x => x.PassedCount);
-                TeacherNode.FailedCount = TeacherNode.Children.Sum(x => x.FailedCount);
-                TeacherNode.UnclassifiedCount = TeacherNode.Children.Sum(x => x.UnclassifiedCount);
+                ComputeScore(TeacherNode, Belfer.Nazwa);
                 AnalysisTree.Add(TeacherNode);
             }
             return AnalysisTree;
@@ -490,37 +402,45 @@ namespace BelferCS
                     StanKlasy = lstLiczbaUczniow.Where(x => x.ClassID == Class.ID).Select(x => x.Count).FirstOrDefault();
                     StanKlasyWirtualnej = lstLiczbaUczniowNI.Where(x => x.SubjectID == Subject.ID).Where(x => x.ClassID == Class.ID).Select(x => x.Count).FirstOrDefault();
                     StanKlasy -= StanKlasyWirtualnej;
-                if (lstLiczbaUczniowGrupa.Where(x => x.ClassID == Class.ID).Where(x => x.SubjectID == Subject.ID).Count() > 0)
-                {
-                    var SubtractList = lstObsada.Where(T => T.Teacher.ID == Teacher.ID).Where(S => S.Subject.ID == Subject.ID).Where(C => C.Class.ID == Class.ID).Select(x => x.Subject.IdSzkolaPrzedmiot);
-                    StanKlasy -= lstLiczbaUczniowGrupa.Where(x => x.ClassID == Class.ID).Where(x => x.SubjectID == Subject.ID).Where(x => !SubtractList.Contains(x.SubjectIdBySchool)).Sum(x => x.Count);                    
-                }
-
+                    if (lstLiczbaUczniowGrupa.Where(x => x.ClassID == Class.ID).Where(x => x.SubjectID == Subject.ID).Count() > 0)
+                    {
+                        var SubtractList = lstObsada.Where(T => T.Teacher.ID == Teacher.ID).Where(S => S.Subject.ID == Subject.ID).Where(C => C.Class.ID == Class.ID).Select(x => x.Subject.IdSzkolaPrzedmiot);
+                        StanKlasy -= lstLiczbaUczniowGrupa.Where(x => x.ClassID == Class.ID).Where(x => x.SubjectID == Subject.ID).Where(x => !SubtractList.Contains(x.SubjectIdBySchool)).Sum(x => x.Count);                
+                    }
                 }
                 else
                 {
                     StanKlasy = lstLiczbaUczniowNI.Where(x => x.SubjectID == Subject.ID).Where(x => x.VirtualClassID == Class.ID).Select(x => x.Count).FirstOrDefault();
                 }
-            List<int> ScoreCount = ComputeScore(Teacher, Subject, Class);
-            return new StaffBranch { Label = Class.Nazwa, ExcelentCount = ScoreCount[6], FailedCount = ScoreCount[1], GoodCount = ScoreCount[4], PassedCount = ScoreCount[2], StudentCount = StanKlasy, SufficientCount = ScoreCount[3], UnclassifiedCount = ScoreCount[0], VeryGoodCount = ScoreCount[5] };
+            var ClassNode = new StaffBranch();
+            ClassNode.Label = Class.Nazwa;
+            ClassNode.StudentCount = StanKlasy;
+            ClassNode.ScoreCount=ComputeScore(Teacher, Subject, Class, ClassNode.ScoreCount.Count());
+            SetAnalysisType += ClassNode.SetOption;
+            return ClassNode;
         }
-        private List<int> ComputeScore(StaffUnit Teacher,StaffUnit Subject, StaffUnit Class)
+        private int[] ComputeScore(StaffUnit Teacher,StaffUnit Subject, StaffUnit Class, int ScoreArraySize)
         {
-            List<int> ScoreCount = new List<int>();
+            int[] ScoreCount = new int[ScoreArraySize];
             List<ScoreInfo> lstScoreCount = lstLiczbaOcen.Where(SI => SI.TeacherID == Teacher.ID).Where(SI=>SI.SubjectID==Subject.ID).Where(SI=>SI.ClassID==Class.ID).ToList();
-            foreach (var S in new List<int> { 0, 1, 2, 3, 4, 5, 6 })
+            for (int i = 0; i < ScoreCount.Count(); i++)
             {
-                int Count = lstScoreCount.Where(W => W.ScoreWeight == S).Sum(x => x.ScoreCount);
-                ScoreCount.Add(Count);
+                ScoreCount[i]=lstScoreCount.Where(W => W.ScoreWeight == i).Sum(x => x.ScoreCount);
             }
             return ScoreCount;
         }
-        #endregion
-               
-        private void cmdClose_Click(object sender, EventArgs e)
+        private void ComputeScore(StaffBranch Node, string Label)
         {
-            this.Close();
+            Node.Label = Label;
+            Node.StudentCount = Node.Children.Sum(x => x.StudentCount);
+            for (int i = 0; i < Node.ScoreCount.Count(); i++)
+            {
+            Node.ScoreCount[i] = Node.Children.Sum(x => x.ScoreCount[i]);
+            }
         }
+        #endregion
+
+        private void cmdClose_Click(object sender, EventArgs e) => Close();
 
         private void tlvAnaliza_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
         {
@@ -553,36 +473,43 @@ namespace BelferCS
         }
         private void tlvAnaliza_CellToolTipShowing(object sender, ToolTipShowingEventArgs e)
         {
+            e.IsBalloon = true;
             switch (e.ColumnIndex)
             {
                 case 2:
-                    e.Text = ((StaffBranch)e.Model).TotalScoreCountByPercent.ToString() + "%";
+                    e.Text = ((ScoreAnalyser)e.Model).TotalScoreCount.ToString()+"\n";
+                    e.Text += ((ScoreAnalyserByPercent)e.Model).TotalScoreCountByPercent().ToString() + "%";
                     break;
                 case 3:
-                    e.Text = ((StaffBranch)e.Model).UnclassifiedCountByPercent.ToString()+"%";
+                    e.Text = ((ScoreAnalyser)e.Model).UnclassifiedCount.ToString() + "\n";
+                    e.Text += ((ScoreAnalyserByPercent)e.Model).UnclassifiedCountByPercent().ToString() + "%";
                     break;
                 case 4:
-                    e.Text = ((StaffBranch)e.Model).ExcelentCountByPercent.ToString() + "%";
+                    e.Text = ((ScoreAnalyser)e.Model).ExcelentCount.ToString() + "\n";
+                    e.Text += ((ScoreAnalyserByPercent)e.Model).ExcelentCountByPercent().ToString() + "%";
                     break;
                 case 5:
-                    e.Text = ((StaffBranch)e.Model).VeryGoodCountByPercent.ToString() + "%";
+                    e.Text = ((ScoreAnalyser)e.Model).VeryGoodCount.ToString() + "\n";
+                    e.Text += ((ScoreAnalyserByPercent)e.Model).VeryGoodCountByPercent().ToString() + "%";
                     break;
                 case 6:
-                    e.Text = ((StaffBranch)e.Model).GoodCountByPercent.ToString() + "%";
+                    e.Text = ((ScoreAnalyser)e.Model).GoodCount.ToString() + "\n";
+                    e.Text += ((ScoreAnalyserByPercent)e.Model).GoodCountByPercent().ToString() + "%";
                     break;
                 case 7:
-                    e.Text = ((StaffBranch)e.Model).SufficientCountByPercent.ToString() + "%";
+                    e.Text = ((ScoreAnalyser)e.Model).SufficientCount.ToString() + "\n";
+                    e.Text += ((ScoreAnalyserByPercent)e.Model).SufficientCountByPercent().ToString() + "%";
                     break;
                 case 8:
-                    e.Text = ((StaffBranch)e.Model).PassedCountByPercent.ToString() + "%";
+                    e.Text = ((ScoreAnalyser)e.Model).PassedCount.ToString() + "\n";
+                    e.Text += ((ScoreAnalyserByPercent)e.Model).PassedCountByPercent().ToString() + "%";
                     break;
                 case 9:
-                    e.Text = ((StaffBranch)e.Model).FailedCountByPercent.ToString() + "%";
+                    e.Text = ((ScoreAnalyser)e.Model).FailedCount.ToString() + "\n";
+                    e.Text += ((ScoreAnalyserByPercent)e.Model).FailedCountByPercent().ToString()+"%";
                     break;
                 case 10:
-                    e.Text = ((StaffBranch)e.Model).AvgScore.ToString();
-                    break;
-                default:
+                    e.Text = ((StaffBranch)e.Model).AvgFull.ToString();
                     break;
             }
         }
@@ -595,12 +522,22 @@ namespace BelferCS
             NewRow += dlgPrint.NewRow;
             dlgPrint.Doc.BeginPrint += PrnDoc_BeginPrint;
             dlgPrint.Doc.PrintPage += tlvAnaliza_PrintPage;
+            dlgPrint.Doc.EndPrint += tlvAnaliza_EndPrint;
             ReportHeader = new List<string> { "Zbiorcza analiza wyników nauczania" };
             dlgPrint.ShowDialog();
         }
-        private void PrnDoc_BeginPrint(object sender, PrintEventArgs e)
+
+        private void tlvAnaliza_EndPrint(object sender, PrintEventArgs e)
         {
             PageNumber = 0;
+            for (int i = 0; i < Offset.GetLength(0); i++)
+            {
+                Offset[i] = 0;
+            }
+        }
+
+        private void PrnDoc_BeginPrint(object sender, PrintEventArgs e)
+        {
             if (e.PrintAction == PrintAction.PrintToPrinter) IsPreview = false; else IsPreview = true;
         }
 
@@ -610,6 +547,7 @@ namespace BelferCS
         {
             #region -------------------------- Print variables definitions -----------------------
             PH.G = e.Graphics;
+            PrintDocument Doc = (PrintDocument)sender;
             float x = IsPreview ? Settings.Default.LeftMargin : Settings.Default.LeftMargin - e.PageSettings.PrintableArea.Left;
             float y = IsPreview ? Settings.Default.TopMargin : Settings.Default.TopMargin - e.PageSettings.PrintableArea.Top;
             Font TextFont = Settings.Default.TextFont;
@@ -622,12 +560,14 @@ namespace BelferCS
             int PrintHeight = e.MarginBounds.Bottom;
             #endregion
 
+            PageNumber +=1;
+
             #region --------------------------- Document header and footer -----------------------
             PH.DrawHeader(x, y, PrintWidth);
             PH.DrawFooter(x, PrintHeight, PrintWidth);
-            PageNumber += 1;
-
             PH.DrawPageNumber("- " + PageNumber.ToString() + " -", x, PrintHeight, PrintWidth, CustomType.PageNumberLocation.Footer);
+            #endregion
+            #region ------------------------------ Report header -----------------------------------
             if (PageNumber == 1)
             {
                 y += LineHeight;
@@ -635,7 +575,6 @@ namespace BelferCS
                 y += HeaderLineHeight * 2;
             }
             #endregion
-
             #region ------------------------------- Column Settings --------------------------
             List<TableCell> Kolumna = new List<TableCell>();
             foreach (OLVColumn Col in tlvAnaliza.Columns)
@@ -651,7 +590,7 @@ namespace BelferCS
             int ColOffset = 0;
             if (PageNumber == 1)
             {
-                for (int i = 0; i < Kolumna.Count()-3; i++)
+                for (int i = 0; i < Kolumna.Count() - 3; i++)
                 {
                     PH.DrawText(Kolumna[i].Label, new Font(TextFont, FontStyle.Bold), x + ColOffset, y, Kolumna[i].Size, LineHeight * MultiplyLine, 1, Brushes.Black);
                     ColOffset += Kolumna[i].Size;
@@ -675,7 +614,7 @@ namespace BelferCS
             #region ------------------------ Table body --------------------------------
             MultiplyLine = 3;
             StaffBranch Level0 = (StaffBranch)tlvAnaliza.GetModelObject(0);
-            if (Offset[0] == 0)
+            if (Offset[0] == 0 & Offset[1] == 0 & Offset[2] == 0)
             {
                 PrintModelObjectData(Level0, x, ref y, Kolumna, new Font(TextFont, FontStyle.Bold), LineHeight * MultiplyLine, 0, true);
                 y += LineHeight * 0.5F;
@@ -685,7 +624,7 @@ namespace BelferCS
             MultiplyLine = rbLiczbowoProcentowo.Checked ? 2 : 0;
             while (y + LineHeight * (4.5f + MultiplyLine) < PrintHeight && Offset[0] < Level0.Children.Count)
             {
-                //MultiplyLine = 2;
+                MultiplyLine = rbLiczbowoProcentowo.Checked ? 2 : 1;
                 StaffBranch Level1 = Level0.Children[Offset[0]];
                 if (Offset[1] == 0 & Offset[2] == 0)
                 {
@@ -693,7 +632,6 @@ namespace BelferCS
                     y += LineHeight * 0.5F;
                 }
 
-                MultiplyLine = rbLiczbowoProcentowo.Checked ? 2 : 1;
                 while (y + LineHeight * 2 * MultiplyLine < PrintHeight && Offset[1] < Level1.Children.Count)
                 {
                     StaffBranch Level2 = Level1.Children[Offset[1]];
@@ -707,8 +645,7 @@ namespace BelferCS
                     }
                     if (Offset[2] < Level2.Children.Count)
                     {
-                        e.HasMorePages = true;
-                        NewRow?.Invoke();
+                        PrintNextPage(Doc, e);
                         return;
                     }
                     else
@@ -720,8 +657,7 @@ namespace BelferCS
                 }
                 if (Offset[1] < Level1.Children.Count)
                 {
-                    e.HasMorePages = true;
-                    NewRow?.Invoke();
+                    PrintNextPage(Doc, e);
                     return;
                 }
                 else
@@ -732,57 +668,56 @@ namespace BelferCS
             }
             if (Offset[0] < ((StaffBranch)tlvAnaliza.GetModelObject(0)).Children.Count)
             {
-                e.HasMorePages = true;
-                NewRow?.Invoke();
+                PrintNextPage(Doc, e);
             }
-            else
-            {
-                Offset[0] = 0;
-            }
+
             #endregion
+        }
+        private void PrintNextPage(PrintDocument Doc, PrintPageEventArgs ppea)
+        {
+            if (IsPreview)
+            {
+                ppea.HasMorePages = true;
+                NewRow?.Invoke();
+                return;
+            }
+            if (ppea.PageSettings.PrinterSettings.PrintRange==PrintRange.SomePages)
+            {
+                if (!PageInRange(ppea.PageSettings.PrinterSettings.FromPage, ppea.PageSettings.PrinterSettings.ToPage))
+                {
+                    ppea.Graphics.Clear(Color.White);
+                    tlvAnaliza_PrintPage(Doc, ppea);
+                }
+                ppea.HasMorePages = PageNumber < ppea.PageSettings.PrinterSettings.ToPage;
+                return;
+            }
+            ppea.HasMorePages = true;
+        }
+        private bool PageInRange(int RangeStart, int RangeEnd)
+        {
+            bool IsPageInRange = PageNumber >= RangeStart;
+            IsPageInRange = IsPageInRange && (PageNumber <= RangeEnd);
+            return IsPageInRange;
         }
         private void PrintModelObjectData(StaffBranch Node, float x, ref float y, List<TableCell> Kolumna, Font PrintFont, float LineHeight, int TabIndent=0, bool FillBackground=false)
         {
-            List<string> AspectToPrint=new List<string>();
+            List<string> AspectToPrint = new List<string>();
+
             AspectToPrint.Add(Node.Label);
             AspectToPrint.Add(Node.StudentCount.ToString());
-            if (rbLiczbowo.Checked)
-            {
-                AspectToPrint.Add(Node.TotalScoreCount.ToString());
-                AspectToPrint.Add(Node.UnclassifiedCount.ToString());
-                AspectToPrint.Add(Node.ExcelentCount.ToString());
-                AspectToPrint.Add(Node.VeryGoodCount.ToString());
-                AspectToPrint.Add(Node.GoodCount.ToString());
-                AspectToPrint.Add(Node.SufficientCount.ToString());
-                AspectToPrint.Add(Node.PassedCount.ToString());
-                AspectToPrint.Add(Node.FailedCount.ToString());
-            }
-            else if (rbProcentowo.Checked)
-            {
-                AspectToPrint.Add(Node.TotalScoreCountByPercent.ToString() + "%");
-                AspectToPrint.Add(Node.UnclassifiedCountByPercent.ToString()+ "%") ;
-                AspectToPrint.Add(Node.ExcelentCountByPercent.ToString() + "%");
-                AspectToPrint.Add(Node.VeryGoodCountByPercent.ToString() + "%");
-                AspectToPrint.Add(Node.GoodCountByPercent.ToString() + "%");
-                AspectToPrint.Add(Node.SufficientCountByPercent.ToString() + "%");
-                AspectToPrint.Add(Node.PassedCountByPercent.ToString() + "%");
-                AspectToPrint.Add(Node.FailedCountByPercent.ToString() + "%");
-            }
-            else
-            {
-                AspectToPrint.Add(Node.TotalScoreCount.ToString() + "\n(" + Node.TotalScoreCountByPercent.ToString() + "%)");
-                AspectToPrint.Add(Node.UnclassifiedCount.ToString() + "\n(" + Node.UnclassifiedCountByPercent.ToString() + "%)");
-                AspectToPrint.Add(Node.ExcelentCount.ToString() + "\n(" + Node.ExcelentCountByPercent.ToString() + "%)");
-                AspectToPrint.Add(Node.VeryGoodCount.ToString() + "\n(" + Node.VeryGoodCountByPercent.ToString() + "%)");
-                AspectToPrint.Add(Node.GoodCount.ToString() + "\n(" + Node.GoodCountByPercent.ToString() + "%)");
-                AspectToPrint.Add(Node.SufficientCount.ToString() + "\n(" + Node.SufficientCountByPercent.ToString() + "%)");
-                AspectToPrint.Add(Node.PassedCount.ToString() + "\n(" + Node.PassedCountByPercent.ToString() + "%)");
-                AspectToPrint.Add(Node.FailedCount.ToString() + "\n(" + Node.FailedCountByPercent.ToString() + "%)");
-            }
+            AspectToPrint.Add(Node.TotalScoreCount);
+            AspectToPrint.Add(Node.UnclassifiedCount);
+            AspectToPrint.Add(Node.ExcelentCount);
+            AspectToPrint.Add(Node.VeryGoodCount);
+            AspectToPrint.Add(Node.GoodCount);
+            AspectToPrint.Add(Node.SufficientCount);
+            AspectToPrint.Add(Node.PassedCount);
+            AspectToPrint.Add(Node.FailedCount);
             AspectToPrint.Add(Node.AvgScore.ToString());
             AspectToPrint.Add(Node.MedianScore.ToString());
             AspectToPrint.Add(Node.DominantScore.ToString());
-            PH.DrawText(AspectToPrint[0], PrintFont, x + TabIndent, y, Kolumna[0].Size - TabIndent, LineHeight, 0, Brushes.Black, true, false, FillBackground);
+
+            PH.DrawText(Node.Label, PrintFont, x + TabIndent, y, Kolumna[0].Size - TabIndent, LineHeight, 0, Brushes.Black, true, false, FillBackground);
             x += Kolumna[0].Size;
 
             for (int i = 1; i < AspectToPrint.Count; i++)
@@ -797,7 +732,8 @@ namespace BelferCS
         /// <summary>
         /// Klasy prywatne do użytku wewnętrznego
         /// </summary>
-        #region --------------------------------- Klasy prywatne na użytek analizy --------------------------
+       
+        #region ------------------------- Private classes for storing data fetched from database ------------------
         private class StaffUnit
         {
             public int ID { get; set; }
@@ -840,212 +776,200 @@ namespace BelferCS
             public int SubjectID { get; set; }
             public int SubjectIdBySchool { get; set; }
         }
- 
-        private class StaffBranch
-        {
-
-            private int[] scorecount=new int[7];
-            public List<StaffBranch> Children = new List<StaffBranch>();
-
-            public string Label { get; set; }
-            public int StudentCount { get; set; }
-            public float AvgScore
-            {
-                get
-                {
-                    int Total=0;
-                    for (int i = 1; i < scorecount.Length; i++)
-                    {
-                        Total += i * scorecount[i];
-                    }
-                    if (Total==0) return 0;
-                    return (float)Math.Round((double)Total / TotalScoreCount, 2);
-                }
-            }
-            public float MedianScore
-            {
-                get
-                {
-                    List<int> Numbers = new List<int>();
-                    for (int i = 1; i < scorecount.Length; i++)
-                    {
-                        for (int j = 0; j < scorecount[i]; j++)
-                        {
-                            Numbers.Add(i);
-                        }
-                    }
-                    if (Numbers.Count == 0) return 0;
-                    int HalfIndex = Numbers.Count() / 2;
-                    if (Numbers.Count() % 2 == 0)
-                    {
-                        return (float)(Numbers[HalfIndex] + Numbers[HalfIndex - 1]) / 2;
-                    }
-                    else
-                    {
-                        return Numbers[HalfIndex];
-                    }
-                }
-            }
-            public float DominantScore
-            {
-                get
-                {
-                    int modal = 1;
-                    for (int i = 2; i < scorecount.Length; i++)
-                    {
-                        if (scorecount[i]>scorecount[modal])
-                        {
-                            modal = i;
-                        }
-                    }
-                    return modal;
-                }
-            }
-            public float TotalScoreCountByPercent
-            {
-                get
-                {
-                    return (float)Math.Round(TotalScoreCount * (double)100 / StudentCount, 2);
-                }
-            }
-            public int TotalScoreCount
-            {
-                get
-                {
-                    return scorecount.Skip(1).Sum();
-                }
-            }            
-            public float UnclassifiedCountByPercent
-            {
-                get
-                {
-                    return (float)Math.Round(scorecount[0] * (double)100 / TotalScoreCount, 2);
-                }
-            }
-
-            public int UnclassifiedCount
-            {
-                get
-                {
-                    return scorecount[0];
-                }
-                set
-                {
-                    scorecount[0] = value;
-                }
-            }
-            public float ExcelentCountByPercent
-            {
-                get
-                {
-                    return (float)Math.Round(scorecount[6] * (double)100 / TotalScoreCount, 2);
-                }
-            }
-            public int ExcelentCount
-            {
-                get
-                {
-                    return scorecount[6];
-                }
-                set
-                {
-                    scorecount[6] = value;
-                }
-            }
-            public float VeryGoodCountByPercent
-            {
-                get
-                {
-                    return (float)Math.Round(scorecount[5] * (double)100 / TotalScoreCount, 2);
-                }
-            }
-            public int VeryGoodCount
-            {
-                get
-                {
-                    return scorecount[5];
-                }
-                set
-                {
-                    scorecount[5] = value;
-                }
-            }
-            public float GoodCountByPercent
-            {
-                get
-                {
-                    return (float)Math.Round(scorecount[4] * (double)100 / TotalScoreCount, 2);
-                }
-            }
-            public int GoodCount
-            {
-                get
-                {
-                    return scorecount[4];
-                }
-                set
-                {
-                    scorecount[4] = value;
-                }
-            }
-            public float SufficientCountByPercent
-            {
-                get
-                {
-                    return (float)Math.Round(scorecount[3] * (double)100 / TotalScoreCount, 2);
-                }
-            }
-            public int SufficientCount
-            {
-                get
-                {
-                    return scorecount[3];
-                }
-                set
-                {
-                    scorecount[3] = value;
-                }
-            }
-            public float PassedCountByPercent
-            {
-                get
-                {
-                    return (float)Math.Round(scorecount[2] * (double)100 / TotalScoreCount, 2);
-                }
-            }
-            public int PassedCount
-            {
-                get
-                {
-                    return scorecount[2];
-                }
-                set
-                {
-                    scorecount[2] = value;
-                }
-            }
-            public float FailedCountByPercent
-            {
-                get
-                {
-                    return (float)Math.Round(scorecount[1] * (double)100 / TotalScoreCount, 2);
-                }
-            }
-            public int FailedCount
-            {
-                get
-                {
-                    return scorecount[1];
-                }
-                set
-                {
-                    scorecount[1] = value;
-                }
-            }            
-        }
         #endregion
-        
 
+        private class StaffBranch : ScoreAnalyserByPercent
+        {
+            private CustomType.AnalysisOption Opcja;
+            public List<StaffBranch> Children = new List<StaffBranch>();
+            
+            public void SetOption(CustomType.AnalysisOption Value) => Opcja = Value;
+            public StaffBranch()
+            {
+                SetOption(CustomType.AnalysisOption.ByNumber);
+            }
+            public StaffBranch(CustomType.AnalysisOption AnalysisType)
+            {
+                SetOption(AnalysisType);
+            }
+            public string AvgFull
+            {
+                get
+                {
+                    return Avg();
+                }
+            }
+            public string AvgScore
+            {
+                get
+                {
+                    return Avg(2);
+                }
+            }
+            public string MedianScore
+            {
+                get
+                {
+                    return Median();
+                }
+            }
+            public string DominantScore
+            {
+                get
+                {
+                    return Dominant();
+                }
+            }
+
+            public new string TotalScoreCount
+            {
+                get
+                {
+                    switch (Opcja)
+                    {
+                        case CustomType.AnalysisOption.ByNumber:
+                            return base.TotalScoreCount.ToString();
+                        case CustomType.AnalysisOption.ByPercent:
+                            return string.Concat(TotalScoreCountByPercent(2).ToString(),"%");
+                        default:
+                            return string.Concat(base.TotalScoreCount.ToString(), "\n", TotalScoreCountByPercent(2).ToString(),"%"); 
+                    }
+                }
+            }
+
+            public new string ExcelentCount
+            {
+                get
+                {
+                    switch (Opcja)
+                    {
+                        case CustomType.AnalysisOption.ByNumber:
+                            return base.ExcelentCount.ToString();
+                        case CustomType.AnalysisOption.ByPercent:
+                            return string.Concat(ExcelentCountByPercent(2).ToString(), "%");
+                        default:
+                            return string.Concat(base.ExcelentCount.ToString(), "\n", ExcelentCountByPercent(2).ToString(), "%"); ;
+                    }
+                }
+            }
+            public new string VeryGoodCount
+            {
+                get
+                {
+                    switch (Opcja)
+                    {
+                        case CustomType.AnalysisOption.ByNumber:
+                            return base.VeryGoodCount.ToString();
+                        case CustomType.AnalysisOption.ByPercent:
+                            return string.Concat(VeryGoodCountByPercent(2).ToString(), "%");
+                        default:
+                            return string.Concat(base.VeryGoodCount.ToString(), "\n", VeryGoodCountByPercent(2).ToString(), "%"); ;
+                    }
+                }
+            }
+
+            public new string GoodCount
+            {
+                get
+                {
+                    switch (Opcja)
+                    {
+                        case CustomType.AnalysisOption.ByNumber:
+                            return base.GoodCount.ToString();
+                        case CustomType.AnalysisOption.ByPercent:
+                            return string.Concat(GoodCountByPercent(2).ToString(), "%");
+                        default:
+                            return string.Concat(base.GoodCount.ToString(), "\n", GoodCountByPercent(2).ToString(), "%"); ;
+                    }
+                }
+            }
+
+            public new string SufficientCount
+            {
+                get
+                {
+                    switch (Opcja)
+                    {
+                        case CustomType.AnalysisOption.ByNumber:
+                            return base.SufficientCount.ToString();
+                        case CustomType.AnalysisOption.ByPercent:
+                            return string.Concat(SufficientCountByPercent(2).ToString(), "%");
+                        default:
+                            return string.Concat(base.SufficientCount.ToString(), "\n", SufficientCountByPercent(2).ToString(), "%"); ;
+                    }
+                }
+            }
+
+            public new string PassedCount
+            {
+                get
+                {
+                    switch (Opcja)
+                    {
+                        case CustomType.AnalysisOption.ByNumber:
+                            return base.PassedCount.ToString();
+                        case CustomType.AnalysisOption.ByPercent:
+                            return string.Concat(PassedCountByPercent(2).ToString(), "%");
+                        default:
+                            return string.Concat(base.PassedCount.ToString(), "\n", PassedCountByPercent(2).ToString(), "%"); ;
+                    }
+                }
+            }
+
+            public new string FailedCount
+            {
+                get
+                {
+                    switch (Opcja)
+                    {
+                        case CustomType.AnalysisOption.ByNumber:
+                            return base.FailedCount.ToString();
+                        case CustomType.AnalysisOption.ByPercent:
+                            return string.Concat(FailedCountByPercent(2).ToString(), "%");
+                        default:
+                            return string.Concat(base.FailedCount.ToString(), "\n", FailedCountByPercent(2).ToString(), "%"); ;
+                    }
+                }
+            }
+            public new string UnclassifiedCount
+            {
+                get
+                {
+                    switch (Opcja)
+                    {
+                        case CustomType.AnalysisOption.ByNumber:
+                            return base.UnclassifiedCount.ToString();
+                        case CustomType.AnalysisOption.ByPercent:
+                            return string.Concat(UnclassifiedCountByPercent(2).ToString(), "%");
+                        default:
+                            return string.Concat(base.UnclassifiedCount.ToString(), "\n", UnclassifiedCountByPercent(2).ToString(), "%"); ;
+                    }
+                }
+            }
+            private string Avg()
+            {
+                var SA = new ScoreAggregate();
+                SA.ScoreCount = ScoreCount;
+                return SA.Avg().ToString();
+            }
+            private string Avg(byte decimalPlaces)
+            {
+                var SA = new ScoreAggregate();
+                SA.ScoreCount = ScoreCount;
+                return SA.Avg(decimalPlaces).ToString();
+            }
+            private string Median()
+            {
+                var SA = new ScoreAggregate();
+                SA.ScoreCount = ScoreCount;
+                return SA.Median().ToString();
+            }
+            private string Dominant()
+            {
+                var SA = new ScoreAggregate();
+                SA.ScoreCount = ScoreCount;
+                return SA.Dominant().ToString();
+            }
+        }
     }
-
 }

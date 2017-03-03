@@ -49,6 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Analysis.cs" />
     <Compile Include="CommonClasses.cs" />
     <Compile Include="dlgPrintPreview.cs">
       <SubType>Form</SubType>
@@ -67,6 +68,12 @@
     </Compile>
     <Compile Include="frmZbiorczaAnalizaOcen.Designer.cs">
       <DependentUpon>frmZbiorczaAnalizaOcen.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmZbiorczyWykazEgzaminPoprawkowy.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmZbiorczyWykazEgzaminPoprawkowy.Designer.cs">
+      <DependentUpon>frmZbiorczyWykazEgzaminPoprawkowy.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -91,6 +98,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="frmZbiorczaAnalizaOcen.resx">
       <DependentUpon>frmZbiorczaAnalizaOcen.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmZbiorczyWykazEgzaminPoprawkowy.resx">
+      <DependentUpon>frmZbiorczyWykazEgzaminPoprawkowy.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
